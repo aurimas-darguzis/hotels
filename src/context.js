@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import items from './data';
+import Client from './components/Contentful';
 
+// Client.getEntries({
+//   content_type: 'beachResortRoomExample'
+// }).then(response => console.log(response.items));
 const RoomContext = React.createContext();
 
 class RoomProvider extends Component {
@@ -20,20 +24,31 @@ class RoomProvider extends Component {
     pets: false
   };
 
+  getData = async () => {
+    try {
+      let response = await Client.getEntries({
+        content_type: 'beachResortRoomExample'
+      });
+      let rooms = this.formatData(response.items);
+      let featuredRooms = rooms.filter(room => room.featured === true);
+      let maxPrice = Math.max(...rooms.map(item => item.price));
+      let maxSize = Math.max(...rooms.map(item => item.size));
+      this.setState({
+        rooms,
+        featuredRooms,
+        sortedRooms: rooms,
+        loading: false,
+        price: maxPrice,
+        maxPrice,
+        maxSize
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   componentDidMount() {
-    let rooms = this.formatData(items);
-    let featuredRooms = rooms.filter(room => room.featured === true);
-    let maxPrice = Math.max(...rooms.map(item => item.price));
-    let maxSize = Math.max(...rooms.map(item => item.size));
-    this.setState({
-      rooms,
-      featuredRooms,
-      sortedRooms: rooms,
-      loading: false,
-      price: maxPrice,
-      maxPrice,
-      maxSize
-    });
+    this.getData();
   }
 
   formatData(items) {
@@ -56,7 +71,6 @@ class RoomProvider extends Component {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = event.target.name;
-    console.log('lol: ', name, value);
     this.setState(
       {
         [name]: value
