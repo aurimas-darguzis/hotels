@@ -1,1 +1,1 @@
-Welcome!
+react-hotels-ad.netlify.com
